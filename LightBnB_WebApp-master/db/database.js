@@ -17,16 +17,6 @@ const users = require("./json/users.json");
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-// const getUserWithEmail = function (email) {
-//   let resolvedUser = null;
-//   for (const userId in users) {
-//     const user = users[userId];
-//     if (user && user.email.toLowerCase() === email.toLowerCase()) {
-//       resolvedUser = user;
-//     }
-//   }
-//   return Promise.resolve(resolvedUser);
-// };
 const getUserWithEmail = (email) => {
   return pool
     .query(`
@@ -35,7 +25,6 @@ const getUserWithEmail = (email) => {
       WHERE email = $1
       `, [email])
     .then((result) => {
-      // console.log(result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
@@ -48,9 +37,6 @@ const getUserWithEmail = (email) => {
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-// const getUserWithId = function (id) {
-//   return Promise.resolve(users[id]);
-// };
 const getUserWithId = (id) => {
   return pool
     .query(`
@@ -59,7 +45,6 @@ const getUserWithId = (id) => {
       WHERE id = $1
       `, [id])
     .then((result) => {
-      // console.log(result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
@@ -72,12 +57,6 @@ const getUserWithId = (id) => {
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
-// const addUser = function (user) {
-//   const userId = Object.keys(users).length + 1;
-//   user.id = userId;
-//   users[userId] = user;
-//   return Promise.resolve(user);
-// };
 const addUser = (obj) => {
 
   const name = obj.name;
@@ -91,7 +70,6 @@ const addUser = (obj) => {
       RETURNING *;
       `, [name, email, pwd])
     .then((result) => {
-      // console.log(result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
@@ -125,7 +103,6 @@ const getAllProperties = (options, limit = 10) => {
       LIMIT $1;
       `, [limit])
     .then((result) => {
-      // console.log(result.rows);
       return result.rows;
     })
     .catch((err) => {
