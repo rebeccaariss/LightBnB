@@ -112,49 +112,73 @@ const getAllReservations = (guest_id, limit = 10) => {
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-// const getAllProperties = (options, limit = 10) => {
-//   return pool
-//     .query(`
-//       SELECT * FROM properties
-//       LIMIT $1;
-//       `, [limit])
-//     .then((result) => {
-//       return result.rows;
-//     })
-//     .catch((err) => {
-//       console.log(err.message);
-//     });
-// };
-
 const getAllProperties = function (options, limit = 10) {
-  // 1
+  // 1. Search filters/parameters provided by user will be stored in this array:
   const queryParams = [];
-  // 2
+  
+  // 2. Establish query (all syntax preceding WHERE clause):
   let queryString = `
-  SELECT properties.*, avg(property_reviews.rating) as average_rating
+  SELECT properties.*, AVG(property_reviews.rating) as average_rating
   FROM properties
   JOIN property_reviews ON properties.id = property_id
   `;
 
-  // 3
-  if (options.city) {
-    queryParams.push(`%${options.city}%`);
-    queryString += `WHERE city LIKE $${queryParams.length} `;
+  // 3. Check for user search filters/parameters,
+  // add them to queryParams array,
+  // append queryString with relevant WHERE clause:
+  if (options.city || options.owner_id || options.minimum_price_per_night && options.maximum_price_per_night) {
+    queryString += `WHERE `;
   }
 
-  // 4
+  if (options.city) {
+    queryParams.push(`%${options.city}%`);
+    queryString += `city LIKE $${queryParams.length} `; // this works because length of queryParams is checked here immediately after pushing this param (from if condition block) to array.
+  }
+
+  if (options.owner_id) {
+    if (options.city) {
+      queryString += `AND `;
+    }
+    queryParams.push(`${options.owner_id}`);
+    queryString += `owner_id = $${queryParams.length} `;
+  }
+
+  if (options.minimum_price_per_night && options.maximum_price_per_night) {
+    if (options.city || options.owner_id) {
+      queryString += `AND `;
+    }
+    queryParams.push(`${options.minimum_price_per_night * 100}`);
+    queryParams.push(`${options.maximum_price_per_night * 100}`);
+    queryString += `properties.cost_per_night >= $${queryParams.length - 1} AND properties.cost_per_night <= $${queryParams.length} `;
+  }
+
+  queryString += `GROUP BY properties.id `;
+
+  // HAVING clause for aggregate functions must follow GROUP BY per syntax:
+  if (options.minimum_rating) {
+    queryParams.push(`${options.minimum_rating}`);
+    queryString += ` HAVING AVG(property_reviews.rating) >= $${queryParams.length} `;
+  }
+
+  // 4. Add limit to queryParams and append query with final clauses (including results limit):
   queryParams.push(limit);
   queryString += `
-  GROUP BY properties.id
   ORDER BY cost_per_night
   LIMIT $${queryParams.length};
   `;
 
-  // 5
+  // 5. Check for correct output:
   console.log(queryString, queryParams);
 
-  // 6
-  return pool.query(queryString, queryParams).then((res) => res.rows);
+  // 6. Execute query:
+  return pool
+    .query(queryString, queryParams)
+    .then((result) => {
+      return result.rows;
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 /**
