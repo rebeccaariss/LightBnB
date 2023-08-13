@@ -1,5 +1,7 @@
 # LightBnB
 
+Designed to practice implementing an AirBnB-like multi-page web application, LightBnB is a Lighthouse Labs project backed by a PostgreSQL databas and Express server. Users can create an account (with credentials hashed and stored in the database), search for rental properties based on various user-supplied criteria/search parameters, and view existing reservations.
+
 ## Project Structure
 
 ```
@@ -53,3 +55,34 @@
 * `routes` contains the router files which are responsible for any HTTP requests to `/users/something` or `/api/something`. 
 * `styles` contains all of the sass files. 
 * `server.js` is the entry point to the application. This connects the routes to the database.
+
+## Dependencies
+  "bcrypt": "^3.0.6",
+  "cookie-session": "^1.3.3",
+  "express": "^4.17.1",
+  "nodemon": "^1.19.1",
+  "pg": "^8.11.2"
+
+Install dependencies by running `npm install` from the terminal.
+
+## Running the Server
+`npm run local`
+
+Access from `localhost:3000`
+
+## Preview
+**Landing page/listings:**
+
+!["Screenshot of LightBnB home page"](docs/home-page.png)
+
+**Search parameters and results returned:**
+
+!["Search form & criteria"](docs/search-parameters.png)
+
+!["Results returned from search (above)"](docs/resulting-search.png)
+
+**User creation and login:**
+
+!["Screenshot of user sign up form"](docs/sign-up.png)
+
+!["Create listing page: signed in user at top left of page"](docs/signed-in.png)
